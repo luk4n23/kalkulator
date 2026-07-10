@@ -1,0 +1,12 @@
+# Render Blueprint — statyczna strona (bez budowania)
+# Deploy: w panelu Render kliknij "New +" > "Blueprint" i wskaż to repo.
+services:
+  - type: web
+    name: ulamex-kalkulator-laser
+    runtime: static
+    staticPublishPath: .
+    buildCommand: ""
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff

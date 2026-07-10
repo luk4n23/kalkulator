@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kalkulator ceny cięcia laserowego ULAMEX. Narzędzie dla handlowca z objaśnieniem każdego pola.">
+  <title>ULAMEX | Kalkulator ceny cięcia laserowego</title>
+  <link rel="icon" href="assets/logo-ulamex.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ NAGŁÓWEK ============ -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <img class="logo" src="assets/logo-ulamex.png" alt="ULAMEX" width="180" height="58">
+      <div class="topbar-text">
+        <h1>Kalkulator ceny cięcia laserowego</h1>
+        <p>Narzędzie dla handlowca. Pod każdym polem znajdziesz, gdzie szukać danej wartości.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ PASEK ZAUFANIA ============ -->
+  <div class="intro">
+    <p>Tego kalkulatora użyjesz bez przygotowania technicznego. Wyjaśnienia pod każdym polem pokazują, gdzie znaleźć każdą wartość. Ofertę dla klienta policzysz samodzielnie.</p>
+  </div>
+
+  <main class="layout">
+
+    <!-- ============ KOLUMNA: FORMULARZ ============ -->
+    <section class="form-col" aria-label="Dane do wyceny">
+
+      <!-- POLE 1: CZAS Z CYPCUT (minuty + sekundy) -->
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="czas-min">Czas cięcia z programu CypCut <span class="unit">[min : sek]</span></label>
+          <span class="info">
+            <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-czas" aria-label="Wyjaśnienie pola">?</button>
+            <span class="tooltip" id="tip-czas" role="tooltip">CypCut to program w laserze. Wczytaj plik klienta, a program pokaże ile minut i sekund dany detal będzie cięty. Wpisz je w dwa pola, bez przeliczania. To jest kluczowe: im więcej otworów w detalu, tym dłużej trwa cięcie.</span>
+          </span>
+        </div>
+        <div class="time-row">
+          <div class="input-wrap">
+            <input type="number" id="czas-min" inputmode="numeric" min="0" step="1" value="2" placeholder="np. 2">
+            <span class="input-suffix">min</span>
+          </div>
+          <div class="input-wrap">
+            <input type="number" id="czas-sek" inputmode="numeric" min="0" max="59" step="1" value="0" placeholder="np. 30">
+            <span class="input-suffix">sek</span>
+          </div>
+        </div>
+        <p class="field-default">Wartość domyślna: <b>2 min 0 sek</b></p>
+        <p class="err" id="err-czas" hidden></p>
+        <div class="advice">
+          <span class="advice-icon" aria-hidden="true">📌</span>
+          <div class="advice-body">
+            <b>Jak to znaleźć:</b>
+            <ol>
+              <li>Pobierz plik od klienta (DXF)</li>
+              <li>Wczytaj do CypCut (File → Open)</li>
+              <li>Zaznacz tabelę parametrów (rodzaj materiału)</li>
+              <li>Program pokaże czas u góry (np. „2 min 30 sec")</li>
+              <li>Przepisz minuty i sekundy do dwóch pól</li>
+            </ol>
+          </div>
+        </div>
+        <p class="example">Przykład: prosty kwadrat 100x100 mm = 0 min 30 sek. Detal z 20 otworami 100x100 mm = 3 min 0 sek.</p>
+      </div>
+
+      <!-- POLE 2: WSPÓŁCZYNNIK KOREKCJI -->
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="korekcja">Współczynnik korekcji CypCut</label>
+          <span class="info">
+            <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-korekcja" aria-label="Wyjaśnienie pola">?</button>
+            <span class="tooltip" id="tip-korekcja" role="tooltip">CypCut czasem liczy niedokładnie. Aby uwzględnić rzeczywisty czas, mnożymy wynik z programu przez ten współczynnik. Dla naszego lasera fiber 6 kW przyjmujemy 1,2, czyli rzeczywisty czas jest o 20% dłuższy niż pokazuje program.</span>
+          </span>
+        </div>
+        <div class="slider-row">
+          <input type="range" id="korekcja-range" min="1" max="2" step="0.05" value="1.2" aria-label="Współczynnik korekcji suwak">
+          <input type="number" id="korekcja" inputmode="decimal" min="1" max="2" step="0.05" value="1.2" class="slider-num">
+        </div>
+        <p class="field-default">Wartość domyślna: <b>1,2</b></p>
+        <p class="err" id="err-korekcja" hidden></p>
+        <div class="advice">
+          <span class="advice-icon" aria-hidden="true">📌</span>
+          <div class="advice-body">
+            <b>Co to jest:</b>
+            <ul>
+              <li>Jeśli CypCut pokazuje 2 min, a laser tnie 2 min 24 sek,</li>
+              <li>to współczynnik = 2:24 ÷ 2 = 1,2</li>
+            </ul>
+            <b>Jak sprawdzić:</b>
+            <ul>
+              <li>Porównaj kilka detali: czas z CypCut vs czas rzeczywisty</li>
+            </ul>
+            <span class="advice-note">Domyślnie 1,2 dla naszego lasera fiber 6 kW.</span>
+          </div>
+        </div>
+        <p class="example">Przykład: nasz laser fiber 6 kW to 1,2. Starszy laser 1,4-1,6. Laser Kimla 1,1-1,2.</p>
+      </div>
+
+      <!-- POLE 3: STAWKA ZA GODZINĘ -->
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="stawka">Nasza stawka za godzinę cięcia <span class="unit">[zł/h]</span></label>
+          <span class="info">
+            <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-stawka" aria-label="Wyjaśnienie pola">?</button>
+            <span class="tooltip" id="tip-stawka" role="tooltip">To ile zarabiamy na laserze za każdą godzinę pracy. Właściciel firmy ustala tę stawkę, żeby laser się opłacał i przynosił zysk. To nie jest płaca pracownika, to KOSZT MASZYNOWY.</span>
+          </span>
+        </div>
+        <div class="input-wrap">
+          <input type="number" id="stawka" inputmode="numeric" min="0" step="50" value="500" placeholder="np. 500">
+          <span class="input-suffix">zł/h</span>
+        </div>
+        <p class="field-default">Wartość domyślna: <b>500 zł/h</b></p>
+        <p class="err" id="err-stawka" hidden></p>
+        <div class="advice">
+          <span class="advice-icon" aria-hidden="true">📌</span>
+          <div class="advice-body">
+            <b>Co to jest:</b>
+            <ul>
+              <li>Ile zarabiamy na laserze za godzinę pracy</li>
+              <li>Dla naszego lasera fiber 6 kW: zazwyczaj 400-700 zł/h</li>
+            </ul>
+            <b>Stawki orientacyjne:</b>
+            <ul>
+              <li>Nowy laser (szybki): 600-800 zł/h</li>
+              <li>Średni laser: 400-600 zł/h</li>
+              <li>Starszy laser: 300-500 zł/h</li>
+            </ul>
+          </div>
+        </div>
+        <p class="example">Przykład przy 500 zł/h: detal 2 min = (2÷60)×500 = 16,67 zł. Detal 5 min = (5÷60)×500 = 41,67 zł.</p>
+      </div>
+
+      <!-- POLE 4: MARŻA -->
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="marza">Marża (zysk firmy) <span class="unit">[%]</span></label>
+          <span class="info">
+            <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-marza" aria-label="Wyjaśnienie pola">?</button>
+            <span class="tooltip" id="tip-marza" role="tooltip">To procent zysku, który ULAMEX chce zarobić na każdym detalu oprócz kosztów cięcia. Jeśli cięcie kosztuje 20 zł, a marża 20%, to zarabiamy dodatkowo 4 zł zysku.</span>
+          </span>
+        </div>
+        <div class="slider-row">
+          <input type="range" id="marza-range" min="0" max="50" step="5" value="20" aria-label="Marża suwak">
+          <div class="value-badge"><span id="marza-display">20</span>%</div>
+        </div>
+        <p class="field-default">Wartość domyślna: <b>20%</b></p>
+        <div class="advice">
+          <span class="advice-icon" aria-hidden="true">📌</span>
+          <div class="advice-body">
+            <b>Jak to działa:</b>
+            <ul>
+              <li>Koszt cięcia: 20 zł</li>
+              <li>Marża 20%: 20 zł × 0,20 = 4 zł</li>
+              <li>Razem dla klienta: 24 zł</li>
+            </ul>
+            <b>Typowe marże:</b>
+            <ul>
+              <li>Duża seria (1000+ szt): 15-20%</li>
+              <li>Średnia seria (100-500 szt): 20-30%</li>
+              <li>Mała seria (1-50 szt): 30-50%</li>
+            </ul>
+            <span class="advice-note">Dla handlowca: zazwyczaj 20% to standard.</span>
+          </div>
+        </div>
+        <p class="example">Marża 20% = +20% do ceny. Marża 30% = +30% do ceny. Marża 0% = bez zysku (tylko odzyskanie kosztów).</p>
+      </div>
+
+      <!-- POLE 5: ILOŚĆ SZTUK -->
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label" for="ilosc">Ile sztuk chce klient <span class="unit">[szt]</span></label>
+          <span class="info">
+            <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-ilosc" aria-label="Wyjaśnienie pola">?</button>
+            <span class="tooltip" id="tip-ilosc" role="tooltip">To liczba kopii tego detalu. Jeśli klient chce 500 sztuk tego samego detalu, wpisz 500. Jeśli detale są różne, licz każdy osobno.</span>
+          </span>
+        </div>
+        <div class="input-wrap">
+          <input type="number" id="ilosc" inputmode="numeric" min="1" step="1" value="1" placeholder="np. 500">
+          <span class="input-suffix">szt</span>
+        </div>
+        <p class="field-default">Wartość domyślna: <b>1 szt.</b></p>
+        <p class="err" id="err-ilosc" hidden></p>
+        <div class="advice">
+          <span class="advice-icon" aria-hidden="true">📌</span>
+          <div class="advice-body">
+            <b>Gdzie to znaleźć:</b>
+            <ul>
+              <li>Zapytaj klienta, ile sztuk potrzebuje</li>
+              <li>Jeśli detale są różne, wyceń każdy osobno</li>
+            </ul>
+            <b>Rabaty za ilość (liczymy automatycznie):</b>
+            <ul>
+              <li>1-10 szt: pełna cena</li>
+              <li>11-50 szt: -5%</li>
+              <li>51-200 szt: -10%</li>
+              <li>powyżej 200 szt: -15%</li>
+            </ul>
+          </div>
+        </div>
+        <p class="example">Klient A chce 500 szt: cena za szt × 500 × rabat -15%. Klient B chce 5 szt: cena za szt × 5, bez rabatu.</p>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" id="btn-reset" class="btn btn-ghost">Przywróć wartości domyślne</button>
+      </div>
+
+    </section>
+
+    <!-- ============ KOLUMNA: WYNIKI ============ -->
+    <aside class="result-col" aria-label="Wynik wyceny">
+      <div class="result-card" id="result-card">
+        <h2 class="result-title">Wynik wyceny</h2>
+
+        <p class="result-time" id="result-time">Rzeczywisty czas cięcia: <b>2,40 min</b> <span>(CypCut × korekcja)</span></p>
+
+        <div class="result-lines">
+          <div class="rline">
+            <div class="rline-label">
+              Koszt cięcia lasera (netto)
+              <span class="rline-hint">Tylko samo cięcie, bez marży.</span>
+            </div>
+            <div class="rline-val" id="out-koszt">0,00 zł</div>
+          </div>
+
+          <div class="rline">
+            <div class="rline-label">
+              Marża (zysk firmy)
+              <span class="rline-hint">Ile firma zarabia, różnica między ceną a kosztem.</span>
+            </div>
+            <div class="rline-val plus" id="out-marza">+ 0,00 zł</div>
+          </div>
+
+          <div class="rline subtotal">
+            <div class="rline-label">Cena za sztukę (bez rabatu)</div>
+            <div class="rline-val" id="out-baza">0,00 zł</div>
+          </div>
+
+          <div class="rline discount" id="rline-rabat" hidden>
+            <div class="rline-label">
+              Rabat za ilość <span id="out-rabat-pct">(-0%)</span>
+              <span class="rline-hint">Automatyczny upust za większą serię.</span>
+            </div>
+            <div class="rline-val minus" id="out-rabat">- 0,00 zł</div>
+          </div>
+        </div>
+
+        <div class="result-final">
+          <div class="final-row">
+            <span class="final-label">Cena za 1 sztukę <small>(do klienta)</small></span>
+            <span class="final-val" id="out-sztuka">0,00 zł</span>
+          </div>
+          <div class="final-row grand">
+            <span class="final-label">Cena całkowita <small id="out-ilosc-label">(1 szt)</small></span>
+            <span class="final-val" id="out-total">0,00 zł</span>
+          </div>
+        </div>
+
+        <p class="result-note">Ceny netto (bez VAT). Wynik przelicza się na bieżąco.</p>
+
+        <button type="button" id="btn-copy" class="btn btn-primary">Kopiuj wycenę do e-maila</button>
+        <p class="copy-ok" id="copy-ok" hidden>Skopiowano. Wklej w wiadomości do klienta.</p>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ============ FAQ / POMOC ============ -->
+  <section class="faq" aria-label="Pomoc dla handlowca">
+    <h2>Pytania? Co powiedzieć klientowi</h2>
+    <div class="faq-grid">
+      <details class="faq-item" open>
+        <summary>Klient: „Ile to kosztuje?"</summary>
+        <p>Zależy od detalu. Potrzebuję plik DXF lub rysunki. Kiedy mi je wyślesz, przygotuję wycenę w ciągu 24h.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Klient: „Czy jest rabat za 1000 szt?"</summary>
+        <p>Tak, rabat naliczamy automatycznie za większą serię. Wpisz ilość do kalkulatora, zobaczysz dokładną cenę.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Klient: „Ile trwa realizacja?"</summary>
+        <p>Zazwyczaj 5-7 dni dla serii 500 szt. Szybszy termin ustalamy indywidualnie.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Klient: „Mogę wziąć 50 szt zamiast 500?"</summary>
+        <p>Oczywiście, ale cena za sztukę będzie wyższa. Przy małych seriach nie ma rabatu.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ STOPKA ============ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img class="footer-logo" src="assets/logo-ulamex.png" alt="ULAMEX" width="120" height="39">
+      <div class="footer-contact">
+        <span>ULAMEX, Zawada 144, Tomaszów Mazowiecki</span>
+        <span>tel. +48 504 424 761</span>
+        <span>e-mail: quote@ulamex.com</span>
+      </div>
+      <p class="footer-note">Narzędzie wewnętrzne dla handlowca. Ceny orientacyjne netto.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

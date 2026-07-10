@@ -1,0 +1,441 @@
+/* ============================================================
+   ULAMEX — Kalkulator ceny cięcia laserowego
+   Kolor marki zapisany jako zmienna. Chcesz #F4373D zamiast
+   oficjalnego #E2001A? Zmień tylko --red poniżej.
+   ============================================================ */
+
+:root {
+  --red: #E2001A;          /* czerwień ULAMEX (logo, oferty) */
+  --red-dark: #b00016;
+  --red-soft: #fde8ea;
+  --graphite: #1c1e22;
+  --graphite-2: #292c31;
+  --silver: #c9ccd1;
+  --ink: #1a1d21;
+  --muted: #666666;        /* porada dla handlowca */
+  --green: #4CAF50;        /* tekst przykładu */
+  --bg: #eef0f3;
+  --card: #ffffff;
+  --border: #e2e5ea;
+  --radius: 12px;
+  --shadow: 0 2px 6px rgba(20, 22, 26, .06), 0 8px 24px rgba(20, 22, 26, .06);
+  --font: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+h1, h2 { margin: 0; font-weight: 700; letter-spacing: -.01em; }
+
+/* ============ NAGŁÓWEK ============ */
+.topbar {
+  background: linear-gradient(135deg, var(--graphite) 0%, var(--graphite-2) 100%);
+  color: #fff;
+  border-bottom: 3px solid var(--red);
+}
+.topbar-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.logo { height: 54px; width: auto; display: block; }
+.topbar-text h1 { font-size: 1.5rem; line-height: 1.2; }
+.topbar-text p { margin: 4px 0 0; color: #c7cad0; font-size: .9rem; }
+
+/* ============ PASEK ZAUFANIA ============ */
+.intro {
+  background: var(--graphite-2);
+  color: #e8eaed;
+}
+.intro p {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  font-size: .9rem;
+  border-left: 4px solid var(--red);
+}
+
+/* ============ UKŁAD ============ */
+.layout {
+  max-width: 1120px;
+  margin: 24px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ============ POLE ============ */
+.field {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.field-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.field-label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.field-label .unit { color: var(--muted); font-weight: 500; font-size: .85rem; }
+
+/* ============ IKONA INFO + TOOLTIP ============ */
+.info { position: relative; display: inline-flex; margin-left: auto; }
+.info-btn {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--red);
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background .15s ease, transform .15s ease;
+}
+.info-btn:hover, .info-btn:focus-visible { background: var(--red-dark); transform: scale(1.08); outline: none; }
+.tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(300px, 78vw);
+  background: var(--graphite);
+  color: #f2f3f5;
+  font-size: .8rem;
+  font-weight: 400;
+  line-height: 1.45;
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.28);
+  z-index: 40;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .16s ease, transform .16s ease, visibility .16s;
+}
+.tooltip::before {
+  content: "";
+  position: absolute;
+  top: -6px; right: 6px;
+  width: 12px; height: 12px;
+  background: var(--graphite);
+  transform: rotate(45deg);
+}
+.info:hover .tooltip,
+.info-btn.is-open + .tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============ POLA WEJŚCIOWE ============ */
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-wrap input {
+  width: 100%;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 11px 58px 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: #fbfbfc;
+  color: var(--ink);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.input-wrap input:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+  background: #fff;
+}
+.input-suffix {
+  position: absolute;
+  right: 14px;
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+input.invalid { border-color: var(--red) !important; background: #fff6f6; }
+
+/* dwa pola: minuty i sekundy */
+.time-row { display: flex; gap: 12px; }
+.time-row .input-wrap { flex: 1; }
+
+/* ============ SUWAKI ============ */
+.slider-row { display: flex; align-items: center; gap: 14px; }
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--red) 0%, var(--red) 50%, #dfe2e7 50%, #dfe2e7 100%);
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--red);
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--red);
+  cursor: pointer;
+}
+.slider-num {
+  width: 84px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px 6px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: #fbfbfc;
+}
+.slider-num:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
+.value-badge {
+  min-width: 72px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--red);
+  background: var(--red-soft);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+/* ============ TEKSTY POMOCNICZE ============ */
+.field-default { margin: 8px 0 0; font-size: .8rem; color: var(--muted); }
+.field-default b { color: var(--ink); }
+
+.err { margin: 8px 0 0; font-size: .82rem; font-weight: 600; color: var(--red); }
+
+.advice {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 0;
+  background: #f7f8fa;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.advice-icon { font-size: .95rem; line-height: 1.6; }
+.advice-body { font-size: .78rem; color: var(--muted); }
+.advice-body b { color: #3a3d42; display: block; margin-top: 6px; }
+.advice-body b:first-child { margin-top: 0; }
+.advice-body ul, .advice-body ol { margin: 3px 0 4px; padding-left: 18px; }
+.advice-body li { margin: 1px 0; }
+.advice-note { display: block; margin-top: 6px; font-style: italic; }
+
+.example {
+  margin: 10px 0 0;
+  font-size: .78rem;
+  font-style: italic;
+  color: var(--green);
+  font-weight: 500;
+}
+.example::before { content: "💡 "; font-style: normal; }
+
+/* ============ AKCJE FORMULARZA ============ */
+.form-actions { margin-top: 4px; }
+.btn {
+  font-family: var(--font);
+  font-size: .92rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 11px 18px;
+  cursor: pointer;
+  border: none;
+  transition: background .15s ease, transform .1s ease, box-shadow .15s ease;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary {
+  width: 100%;
+  background: var(--red);
+  color: #fff;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(226,0,26,.28);
+}
+.btn-primary:hover { background: var(--red-dark); }
+.btn-ghost {
+  background: #fff;
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--silver); color: var(--ink); }
+
+/* ============ PANEL WYNIKU ============ */
+.result-col { position: sticky; top: 20px; }
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--red);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.result-title { font-size: 1.2rem; margin-bottom: 4px; }
+.result-time {
+  margin: 0 0 14px;
+  font-size: .82rem;
+  color: var(--muted);
+}
+.result-time b { color: var(--ink); }
+.result-time span { font-size: .74rem; }
+
+.result-lines { border-top: 1px solid var(--border); }
+.rline {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.rline-label { font-size: .88rem; font-weight: 600; color: var(--ink); }
+.rline-hint { display: block; font-size: .72rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.rline-val { font-size: 1rem; font-weight: 700; white-space: nowrap; }
+.rline-val.plus { color: #2e7d32; }
+.rline-val.minus { color: var(--red); }
+.rline.subtotal .rline-label { font-weight: 700; }
+.rline.discount .rline-label { color: var(--red); }
+/* atrybut hidden musi pokonać display:flex z .rline */
+.rline[hidden] { display: none; }
+
+.result-final { margin-top: 14px; }
+.final-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+}
+.final-row .final-label { font-weight: 600; font-size: .92rem; }
+.final-row .final-label small { color: var(--muted); font-weight: 500; }
+.final-row .final-val { font-size: 1.15rem; font-weight: 700; }
+.final-row.grand {
+  margin-top: 6px;
+  padding: 14px 16px;
+  background: var(--graphite);
+  color: #fff;
+  border-radius: 10px;
+}
+.final-row.grand .final-label { font-size: 1rem; }
+.final-row.grand .final-label small { color: #b9bcc2; }
+.final-row.grand .final-val { font-size: 1.5rem; color: #fff; }
+
+.result-note { margin: 14px 0 0; font-size: .74rem; color: var(--muted); text-align: center; }
+.copy-ok { margin: 8px 0 0; font-size: .82rem; font-weight: 600; color: #2e7d32; text-align: center; }
+
+/* ============ FAQ ============ */
+.faq {
+  max-width: 1120px;
+  margin: 8px auto 32px;
+  padding: 0 20px;
+}
+.faq > h2 { font-size: 1.25rem; margin-bottom: 14px; }
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.faq-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 16px;
+  box-shadow: var(--shadow);
+}
+.faq-item summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 12px 0;
+  list-style: none;
+  position: relative;
+  padding-right: 28px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+";
+  position: absolute;
+  right: 2px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--red);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.faq-item[open] summary::after { content: "−"; }
+.faq-item p { margin: 0 0 14px; color: #45484d; font-size: .9rem; }
+
+/* ============ STOPKA ============ */
+.site-footer {
+  background: var(--graphite);
+  color: #c7cad0;
+  border-top: 3px solid var(--red);
+}
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.footer-logo { height: 38px; width: auto; }
+.footer-contact { display: flex; flex-direction: column; font-size: .84rem; gap: 2px; }
+.footer-note { margin-left: auto; font-size: .76rem; color: #8b8f96; }
+
+/* ============ RESPONSYWNOŚĆ ============ */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .result-col { position: static; order: -1; }  /* wynik na górze na telefonie */
+  .faq-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+  .topbar-text h1 { font-size: 1.25rem; }
+  .final-row.grand .final-val { font-size: 1.3rem; }
+  .footer-note { margin-left: 0; width: 100%; }
+}
+
+/* ============ DRUK ============ */
+@media print {
+  .topbar, .intro, .info, .advice, .example, .field-default, .form-actions,
+  .btn, .faq, .site-footer, .err { display: none !important; }
+  body { background: #fff; }
+  .layout { display: block; margin: 0; }
+  .result-col { position: static; }
+  .field { break-inside: avoid; box-shadow: none; }
+}

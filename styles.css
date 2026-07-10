@@ -359,6 +359,85 @@ input[type="range"]::-moz-range-thumb {
 .result-note { margin: 14px 0 0; font-size: .74rem; color: var(--muted); text-align: center; }
 .copy-ok { margin: 8px 0 0; font-size: .82rem; font-weight: 600; color: #2e7d32; text-align: center; }
 
+/* ============ NAGŁÓWKI GRUP W FORMULARZU ============ */
+.group-head {
+  font-weight: 800;
+  font-size: 1.02rem;
+  color: var(--ink);
+  margin: 4px 2px 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--red);
+}
+.group-head .group-sub {
+  display: block;
+  font-weight: 500;
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.field + .group-head { margin-top: 10px; }
+
+/* pole tekstowe (nazwa) nie potrzebuje miejsca na sufiks */
+.input-wrap input[type="text"] { padding-right: 14px; }
+
+/* ============ PRZYCISK DODAJ / STANY ============ */
+.btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.add-hint { margin: 8px 0 0; font-size: .8rem; color: var(--muted); text-align: center; }
+
+/* ============ KARTA: WYCENA ŁĄCZNA ============ */
+.quote-card { margin-top: 16px; }
+.poz-empty {
+  font-size: .85rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 14px 8px;
+  margin: 6px 0 0;
+  background: #f7f8fa;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+.poz-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.poz-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.poz-main { flex: 1; min-width: 0; }
+.poz-name { font-weight: 700; font-size: .9rem; color: var(--ink); word-break: break-word; }
+.poz-detail { font-size: .76rem; color: var(--muted); margin-top: 2px; }
+.poz-val { font-weight: 700; font-size: .95rem; white-space: nowrap; }
+.poz-remove {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+.poz-remove:hover { color: var(--red); background: var(--red-soft); }
+
+.grand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--graphite);
+  color: #fff;
+  border-radius: 10px;
+}
+.grand-row .grand-label { font-weight: 700; font-size: 1rem; }
+.grand-row .grand-val { font-weight: 800; font-size: 1.5rem; color: #fff; }
+
+.quote-actions { display: flex; gap: 10px; margin-top: 14px; }
+.quote-actions .btn { flex: 1; margin-top: 0; }
+
 /* ============ FAQ ============ */
 .faq {
   max-width: 1120px;
@@ -421,7 +500,7 @@ input[type="range"]::-moz-range-thumb {
 /* ============ RESPONSYWNOŚĆ ============ */
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
-  .result-col { position: static; order: -1; }  /* wynik na górze na telefonie */
+  .result-col { position: static; }  /* na telefonie: formularz, potem wynik i wycena łączna */
   .faq-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {

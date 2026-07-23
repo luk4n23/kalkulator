@@ -242,6 +242,41 @@ input[type="range"]::-moz-range-thumb {
 
 .err { margin: 8px 0 0; font-size: .82rem; font-weight: 600; color: var(--red); }
 
+/* Przelacznik: czas jednej sztuki / calego programu */
+.czas-tryb {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: #f6f7f9;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 16px;
+  font-size: .9rem;
+}
+.czas-tryb-label { font-weight: 700; color: var(--ink); }
+.czas-tryb-opt { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.czas-tryb-opt input { accent-color: var(--red); width: 16px; height: 16px; cursor: pointer; }
+.czas-tryb-sub {
+  margin: 8px 0 0;
+  padding: 12px;
+  background: var(--red-soft);
+  border: 1px solid #f3c9ce;
+  border-radius: 10px;
+}
+.czas-tryb-sub .field-label { margin-bottom: 6px; }
+.warn {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #8a5a00;
+  background: #fff8e6;
+  border: 1px solid #f0dca8;
+  border-radius: 10px;
+}
+
 .advice {
   display: flex;
   gap: 8px;

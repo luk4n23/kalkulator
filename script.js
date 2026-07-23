@@ -14,7 +14,7 @@ const num2 = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumF
 const int0 = new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 });
 
 /* ---------- Domyślne ustawienia (nie detal) ---------- */
-const DEFAULTS = { korekcja: '1.2', stawka: '500', marza: '20' };
+const DEFAULTS = { korekcja: '1.2', stawka: '600', marza: '20' };
 
 /* ---------- Skróty do elementów ---------- */
 const $ = (id) => document.getElementById(id);
@@ -31,6 +31,11 @@ const el = {
   czasMin: $('czas-min'),
   czasSek: $('czas-sek'),
   ilosc: $('ilosc'),
+  // czas: jedna sztuka czy caly program (nest)
+  czasTryb: document.querySelectorAll('input[name="czas-tryb"]'),
+  sztProgram: $('szt-program'),
+  wrapSztProgram: $('wrap-szt-program'),
+  warnCzas: $('warn-czas'),
   // karta bieżącego detalu
   time: $('result-time'),
   koszt: $('out-koszt'),
@@ -70,6 +75,10 @@ function clearError(inputEl, errId) {
   const e = $(errId);
   if (e) { e.hidden = true; e.textContent = ''; }
   if (inputEl) inputEl.classList.remove('invalid');
+}
+function trybCzasu() {
+  const r = document.querySelector('input[name="czas-tryb"]:checked');
+  return r ? r.value : 'szt';
 }
 function rabatProc(qty) {
   if (qty <= 10) return 0;
@@ -160,10 +169,29 @@ function przelicz() {
     ok = false;
   } else { clearError(el.ilosc, 'err-ilosc'); ilosc = Math.floor(ilosc); }
 
+  // Czas z CypCut moze dotyczyc CALEGO programu (nestu) - wtedy dzielimy go przez
+  // liczbe sztuk w tym programie, zeby dostac czas na 1 sztuke.
+  const tryb = trybCzasu();
+  let sztWProgramie = 1;
+  if (tryb === 'program') {
+    const raw = el.sztProgram.value.trim();
+    const v = raw === '' ? ilosc : parseNum(raw);
+    if (isNaN(v) || v < 1) {
+      if (ok) showError(el.sztProgram, 'err-szt-program', 'Podaj, ile sztuk było w tym programie (min. 1).');
+      ok = false;
+    } else {
+      clearError(el.sztProgram, 'err-szt-program');
+      sztWProgramie = Math.floor(v);
+    }
+  } else {
+    clearError(el.sztProgram, 'err-szt-program');
+  }
+
   if (!ok) { biezacy = null; pokazBrak(null); return; }
 
   // --- Obliczenia ---
-  const czasRzecz = czas * korekcja;
+  const czasJedn = czas / sztWProgramie;   // czas na 1 sztuke
+  const czasRzecz = czasJedn * korekcja;
   const kosztCiecia = (czasRzecz / 60) * stawka;
   const kwotaMarzy = kosztCiecia * (marza / 100);
   const bazaSztuka = kosztCiecia + kwotaMarzy;
@@ -173,7 +201,20 @@ function przelicz() {
   const wartosc = cenaSztuka * ilosc;
 
   // --- Render karty bieżącej ---
-  el.time.innerHTML = `Rzeczywisty czas cięcia: <b>${num2.format(czasRzecz)} min</b> <span>(CypCut × korekcja)</span>`;
+  const zrodloCzasu = tryb === 'program'
+    ? `<span>(program ${num2.format(czas)} min ÷ ${int0.format(sztWProgramie)} szt × korekcja)</span>`
+    : `<span>(CypCut × korekcja)</span>`;
+  el.time.innerHTML = `Rzeczywisty czas cięcia: <b>${num2.format(czasRzecz)} min/szt</b> ${zrodloCzasu}`;
+
+  // Ostrzezenie, gdy laczny czas maszyny wychodzi absurdalnie duzy (typowy objaw:
+  // wpisany czas calego programu jako czas jednej sztuki).
+  const lacznieMin = czasRzecz * ilosc;
+  if (lacznieMin > 6000) {
+    el.warnCzas.hidden = false;
+    el.warnCzas.textContent = `⚠ To ${num2.format(lacznieMin / 60)} h pracy lasera na samą tę pozycję. Sprawdź, czy podany czas nie dotyczy całego programu — jeśli tak, przełącz opcję „całego programu” powyżej.`;
+  } else {
+    el.warnCzas.hidden = true;
+  }
   el.koszt.textContent = zl.format(kosztCiecia);
   el.marza.textContent = '+ ' + zl.format(kwotaMarzy);
   el.baza.textContent = zl.format(bazaSztuka);
@@ -203,6 +244,7 @@ function pokazBrak(msg) {
   el.wartosc.textContent = dash;
   el.wartoscLabel.textContent = '';
   el.time.textContent = msg ? msg : 'Popraw zaznaczone pole, aby wycenić detal.';
+  if (el.warnCzas) el.warnCzas.hidden = true;
   ustawAdd(false);
 }
 
@@ -268,6 +310,7 @@ el.btnAdd.addEventListener('click', () => {
   el.czasMin.value = '';
   el.czasSek.value = '';
   el.ilosc.value = '';
+  el.sztProgram.value = ''; // liczba sztuk w programie jest inna dla kazdego detalu
   przelicz();
   el.czasMin.focus();
 });
@@ -354,6 +397,15 @@ el.marzaRange.addEventListener('input', () => {
   el[id].addEventListener('input', przelicz);
 });
 
+/* ---------- Przelacznik: czas jednej sztuki / calego programu ---------- */
+el.czasTryb.forEach((r) => {
+  r.addEventListener('change', () => {
+    el.wrapSztProgram.hidden = trybCzasu() !== 'program';
+    przelicz();
+  });
+});
+el.sztProgram.addEventListener('input', przelicz);
+
 /* ---------- Tooltipy (klik na telefonie, hover na desktopie) ---------- */
 const infoButtons = document.querySelectorAll('.info-btn');
 infoButtons.forEach((btn) => {
@@ -384,6 +436,11 @@ el.btnReset.addEventListener('click', () => {
   el.czasMin.value = '';
   el.czasSek.value = '';
   el.ilosc.value = '';
+  const trybSzt = document.querySelector('input[name="czas-tryb"][value="szt"]');
+  if (trybSzt) trybSzt.checked = true;
+  el.sztProgram.value = '';
+  el.wrapSztProgram.hidden = true;
+  clearError(el.sztProgram, 'err-szt-program');
   updateRangeFill(el.korekcjaRange);
   updateRangeFill(el.marzaRange);
   przelicz();

@@ -78,10 +78,10 @@
           </span>
         </div>
         <div class="input-wrap">
-          <input type="number" id="stawka" inputmode="numeric" min="0" step="50" value="500" placeholder="np. 500">
+          <input type="number" id="stawka" inputmode="numeric" min="0" step="50" value="600" placeholder="np. 600">
           <span class="input-suffix">zł/h</span>
         </div>
-        <p class="field-default">Wartość domyślna: <b>500 zł/h</b></p>
+        <p class="field-default">Wartość domyślna: <b>600 zł/h</b></p>
         <p class="err" id="err-stawka" hidden></p>
         <div class="advice">
           <span class="advice-icon" aria-hidden="true">📌</span>
@@ -99,7 +99,7 @@
             </ul>
           </div>
         </div>
-        <p class="example">Przykład przy 500 zł/h: detal 2 min = (2÷60)×500 = 16,67 zł. Detal 5 min = (5÷60)×500 = 41,67 zł.</p>
+        <p class="example">Przykład przy 600 zł/h: detal 2 min = (2÷60)×600 = 20 zł. Detal 5 min = (5÷60)×600 = 50 zł.</p>
       </div>
 
       <!-- USTAWIENIE: MARŻA -->
@@ -178,6 +178,27 @@
         </div>
         <p class="field-default">Przepisz z CypCut, np. <b>2 min 30 sek</b>.</p>
         <p class="err" id="err-czas" hidden></p>
+
+        <!-- Czy podany czas dotyczy jednej sztuki, czy calego programu (nestu) -->
+        <div class="czas-tryb">
+          <span class="czas-tryb-label">Ten czas dotyczy:</span>
+          <label class="czas-tryb-opt">
+            <input type="radio" name="czas-tryb" value="szt" checked> jednej sztuki
+          </label>
+          <label class="czas-tryb-opt">
+            <input type="radio" name="czas-tryb" value="program"> całego programu (wszystkich sztuk)
+          </label>
+        </div>
+        <div class="czas-tryb-sub" id="wrap-szt-program" hidden>
+          <label class="field-label" for="szt-program">Ile sztuk było w tym programie <span class="unit">[szt]</span></label>
+          <div class="input-wrap">
+            <input type="number" id="szt-program" inputmode="numeric" min="1" step="1" placeholder="np. 800">
+            <span class="input-suffix">szt</span>
+          </div>
+          <p class="field-default">Puste = tyle, ile chce klient (pole „Ile sztuk chce klient”).</p>
+          <p class="err" id="err-szt-program" hidden></p>
+        </div>
+        <p class="warn" id="warn-czas" hidden></p>
         <div class="advice">
           <span class="advice-icon" aria-hidden="true">📌</span>
           <div class="advice-body">

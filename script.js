@@ -14,7 +14,9 @@ const num2 = new Intl.NumberFormat('pl-PL', { minimumFractionDigits: 2, maximumF
 const int0 = new Intl.NumberFormat('pl-PL', { maximumFractionDigits: 0 });
 
 /* ---------- Domyślne ustawienia (nie detal) ---------- */
-const DEFAULTS = { korekcja: '1.2', stawka: '600', marza: '20' };
+const DEFAULTS = { korekcja: '1.2', marza: '20' };
+/* Stawka maszynowa jest stała (nie do edycji w UI). */
+const STAWKA = 600;
 
 /* ---------- Skróty do elementów ---------- */
 const $ = (id) => document.getElementById(id);
@@ -23,7 +25,6 @@ const el = {
   // ustawienia wspólne
   korekcja: $('korekcja'),
   korekcjaRange: $('korekcja-range'),
-  stawka: $('stawka'),
   marzaRange: $('marza-range'),
   marzaDisplay: $('marza-display'),
   // detal
@@ -31,6 +32,8 @@ const el = {
   czasMin: $('czas-min'),
   czasSek: $('czas-sek'),
   ilosc: $('ilosc'),
+  chkPrototyp: $('chk-prototyp'),
+  chkPrototypMichal: $('chk-prototyp-michal'),
   // czas: jedna sztuka czy caly program (nest)
   czasTryb: document.querySelectorAll('input[name="czas-tryb"]'),
   sztProgram: $('szt-program'),
@@ -45,6 +48,9 @@ const el = {
   rabatPct: $('out-rabat-pct'),
   rabat: $('out-rabat'),
   sztuka: $('out-sztuka'),
+  rowDoplata: $('row-doplata'),
+  doplataLabel: $('out-doplata-label'),
+  doplataVal: $('out-doplata'),
   wartosc: $('out-wartosc'),
   wartoscLabel: $('out-wartosc-label'),
   btnAdd: $('btn-add'),
@@ -110,13 +116,7 @@ function przelicz() {
     settingsOk = false;
   } else { clearError(el.korekcja, 'err-korekcja'); }
 
-  const stawka = parseNum(el.stawka.value);
-  if (isNaN(stawka) || stawka < 0) {
-    showError(el.stawka, 'err-stawka', 'Stawka nie może być ujemna. Wpisz stawkę za godzinę cięcia.');
-    settingsOk = false;
-  } else if (stawka === 0) {
-    showError(el.stawka, 'err-stawka', 'Stawka wynosi 0. Sprawdź, czy to prawidłowa wartość.');
-  } else { clearError(el.stawka, 'err-stawka'); }
+  const stawka = STAWKA;   // stała stawka maszynowa
 
   const marza = parseNum(el.marzaRange.value);
 
@@ -129,7 +129,7 @@ function przelicz() {
 
   if (!settingsOk) {
     biezacy = null;
-    pokazBrak('Popraw ustawienia wyceny (współczynnik lub stawka).');
+    pokazBrak('Popraw współczynnik korekcji.');
     return;
   }
   if (incomplete) {
@@ -198,7 +198,10 @@ function przelicz() {
   const rabat = rabatProc(ilosc);
   const kwotaRabatu = bazaSztuka * (rabat / 100);
   const cenaSztuka = bazaSztuka - kwotaRabatu;
-  const wartosc = cenaSztuka * ilosc;
+  // Jednorazowa dopłata za prototyp (do wartości detalu, nie na sztukę)
+  const doplata = (el.chkPrototyp.checked ? 50 : 0) + (el.chkPrototypMichal.checked ? 100 : 0);
+  const doplataOpis = el.chkPrototypMichal.checked ? 'prototyp + Michał' : (el.chkPrototyp.checked ? 'prototyp' : '');
+  const wartosc = cenaSztuka * ilosc + doplata;
 
   // --- Render karty bieżącej ---
   const zrodloCzasu = tryb === 'program'
@@ -226,11 +229,19 @@ function przelicz() {
     el.rlineRabat.hidden = true;
   }
   el.sztuka.textContent = zl.format(cenaSztuka);
+  if (doplata > 0) {
+    el.rowDoplata.hidden = false;
+    el.doplataLabel.textContent = `(${doplataOpis})`;
+    el.doplataVal.textContent = '+ ' + zl.format(doplata);
+  } else {
+    el.rowDoplata.hidden = true;
+  }
   el.wartosc.textContent = zl.format(wartosc);
   el.wartoscLabel.textContent = `(${int0.format(ilosc)} szt${rabat > 0 ? `, rabat -${rabat}%` : ''})`;
 
   biezacy = { czasMin, czasSek, korekcja, stawka, marza, czasRzecz,
-              kosztCiecia, kwotaMarzy, bazaSztuka, rabat, kwotaRabatu, cenaSztuka, ilosc, wartosc };
+              kosztCiecia, kwotaMarzy, bazaSztuka, rabat, kwotaRabatu, cenaSztuka,
+              doplata, doplataOpis, ilosc, wartosc };
   ustawAdd(true);
 }
 
@@ -241,6 +252,7 @@ function pokazBrak(msg) {
   el.baza.textContent = dash;
   el.rlineRabat.hidden = true;
   el.sztuka.textContent = dash;
+  if (el.rowDoplata) el.rowDoplata.hidden = true;
   el.wartosc.textContent = dash;
   el.wartoscLabel.textContent = '';
   el.time.textContent = msg ? msg : 'Popraw zaznaczone pole, aby wycenić detal.';
@@ -275,7 +287,7 @@ function renderPozycje() {
     name.textContent = `${i + 1}. ${p.nazwa}`;
     const det = document.createElement('div');
     det.className = 'poz-detail';
-    det.textContent = `${int0.format(p.ilosc)} szt × ${zl.format(p.cenaSztuka)}/szt${p.rabat > 0 ? ` · rabat -${p.rabat}%` : ''}`;
+    det.textContent = `${int0.format(p.ilosc)} szt × ${zl.format(p.cenaSztuka)}/szt${p.rabat > 0 ? ` · rabat -${p.rabat}%` : ''}${p.doplata > 0 ? ` · ${p.doplataOpis} +${zl.format(p.doplata)}` : ''}`;
     main.appendChild(name);
     main.appendChild(det);
 
@@ -311,6 +323,8 @@ el.btnAdd.addEventListener('click', () => {
   el.czasSek.value = '';
   el.ilosc.value = '';
   el.sztProgram.value = ''; // liczba sztuk w programie jest inna dla kazdego detalu
+  el.chkPrototyp.checked = false;
+  el.chkPrototypMichal.checked = false;
   przelicz();
   el.czasMin.focus();
 });
@@ -342,7 +356,7 @@ el.btnCopy.addEventListener('click', async () => {
   const lines = ['Wycena cięcia laserowego ULAMEX', '================================'];
   lista.forEach((p, i) => {
     suma += p.wartosc;
-    lines.push(`${i + 1}. ${p.nazwa}: ${int0.format(p.ilosc)} szt × ${zl.format(p.cenaSztuka)}/szt${p.rabat > 0 ? ` (rabat -${p.rabat}%)` : ''} = ${zl.format(p.wartosc)}`);
+    lines.push(`${i + 1}. ${p.nazwa}: ${int0.format(p.ilosc)} szt × ${zl.format(p.cenaSztuka)}/szt${p.rabat > 0 ? ` (rabat -${p.rabat}%)` : ''}${p.doplata > 0 ? ` + ${p.doplataOpis} ${zl.format(p.doplata)}` : ''} = ${zl.format(p.wartosc)}`);
   });
   lines.push('--------------------------------');
   lines.push(`RAZEM netto: ${zl.format(suma)}`);
@@ -393,8 +407,18 @@ el.marzaRange.addEventListener('input', () => {
   updateRangeFill(el.marzaRange);
   przelicz();
 });
-['czasMin', 'czasSek', 'stawka', 'ilosc'].forEach((id) => {
+['czasMin', 'czasSek', 'ilosc'].forEach((id) => {
   el[id].addEventListener('input', przelicz);
+});
+
+/* ---------- Dopłaty: prototyp (wzajemnie wykluczające się) ---------- */
+el.chkPrototyp.addEventListener('change', () => {
+  if (el.chkPrototyp.checked) el.chkPrototypMichal.checked = false;
+  przelicz();
+});
+el.chkPrototypMichal.addEventListener('change', () => {
+  if (el.chkPrototypMichal.checked) el.chkPrototyp.checked = false;
+  przelicz();
 });
 
 /* ---------- Przelacznik: czas jednej sztuki / calego programu ---------- */
@@ -429,13 +453,14 @@ document.addEventListener('keydown', (e) => {
 el.btnReset.addEventListener('click', () => {
   el.korekcja.value = DEFAULTS.korekcja;
   el.korekcjaRange.value = DEFAULTS.korekcja;
-  el.stawka.value = DEFAULTS.stawka;
   el.marzaRange.value = DEFAULTS.marza;
   el.marzaDisplay.textContent = DEFAULTS.marza;
   el.nazwa.value = '';
   el.czasMin.value = '';
   el.czasSek.value = '';
   el.ilosc.value = '';
+  el.chkPrototyp.checked = false;
+  el.chkPrototypMichal.checked = false;
   const trybSzt = document.querySelector('input[name="czas-tryb"][value="szt"]');
   if (trybSzt) trybSzt.checked = true;
   el.sztProgram.value = '';

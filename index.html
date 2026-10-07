@@ -68,38 +68,17 @@
         <p class="example">Przykład: nasz laser fiber 6 kW to 1,2. Starszy laser 1,4-1,6. Laser Kimla 1,1-1,2.</p>
       </div>
 
-      <!-- USTAWIENIE: STAWKA ZA GODZINĘ -->
+      <!-- USTAWIENIE: STAWKA ZA GODZINĘ (stała 600 zł/h) -->
       <div class="field">
         <div class="field-head">
-          <label class="field-label" for="stawka">Nasza stawka za godzinę cięcia <span class="unit">[zł/h]</span></label>
+          <label class="field-label">Stawka za godzinę cięcia <span class="unit">[zł/h]</span></label>
           <span class="info">
             <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-stawka" aria-label="Wyjaśnienie pola">?</button>
-            <span class="tooltip" id="tip-stawka" role="tooltip">To ile zarabiamy na laserze za każdą godzinę pracy. Właściciel firmy ustala tę stawkę, żeby laser się opłacał i przynosił zysk. To nie jest płaca pracownika, to KOSZT MASZYNOWY.</span>
+            <span class="tooltip" id="tip-stawka" role="tooltip">Koszt maszynowy lasera za każdą godzinę pracy. Ustalony na stałe 600 zł/h, żeby wyceny były spójne i nikt nie zaniżał ceny. Upusty dla klienta dajesz przez marżę i rabat za ilość.</span>
           </span>
         </div>
-        <div class="input-wrap">
-          <input type="number" id="stawka" inputmode="numeric" min="0" step="50" value="600" placeholder="np. 600">
-          <span class="input-suffix">zł/h</span>
-        </div>
-        <p class="field-default">Wartość domyślna: <b>600 zł/h</b></p>
-        <p class="err" id="err-stawka" hidden></p>
-        <div class="advice">
-          <span class="advice-icon" aria-hidden="true">📌</span>
-          <div class="advice-body">
-            <b>Co to jest:</b>
-            <ul>
-              <li>Ile zarabiamy na laserze za godzinę pracy</li>
-              <li>Dla naszego lasera fiber 6 kW: zazwyczaj 400-700 zł/h</li>
-            </ul>
-            <b>Stawki orientacyjne:</b>
-            <ul>
-              <li>Nowy laser (szybki): 600-800 zł/h</li>
-              <li>Średni laser: 400-600 zł/h</li>
-              <li>Starszy laser: 300-500 zł/h</li>
-            </ul>
-          </div>
-        </div>
-        <p class="example">Przykład przy 600 zł/h: detal 2 min = (2÷60)×600 = 20 zł. Detal 5 min = (5÷60)×600 = 50 zł.</p>
+        <div class="locked-value">600 zł/h <span class="locked-badge">stała</span></div>
+        <p class="field-default">Stawka maszynowa jest stała. Rabatowanie robisz marżą i rabatem za ilość poniżej.</p>
       </div>
 
       <!-- USTAWIENIE: MARŻA -->
@@ -250,6 +229,22 @@
         <p class="example">Klient chce 500 szt tego detalu: cena za szt × 500 × rabat -15%. Inny detal wyceniasz osobno.</p>
       </div>
 
+      <!-- DETAL: DOPŁATY (prototyp) -->
+      <div class="field">
+        <div class="field-head">
+          <label class="field-label">Dopłaty do detalu</label>
+          <span class="info">
+            <button type="button" class="info-btn" aria-expanded="false" aria-controls="tip-doplaty" aria-label="Wyjaśnienie pola">?</button>
+            <span class="tooltip" id="tip-doplaty" role="tooltip">Jednorazowa dopłata doliczana do wartości tego detalu (nie na sztukę). „Prototyp” +50 zł. „Prototyp + Michał” +100 zł, gdy detal wymaga pracy Michała. Zaznaczasz jedną z opcji.</span>
+          </span>
+        </div>
+        <div class="check-group">
+          <label class="check"><input type="checkbox" id="chk-prototyp"> <span class="check-text">Prototyp</span> <span class="check-plus">+50 zł</span></label>
+          <label class="check"><input type="checkbox" id="chk-prototyp-michal"> <span class="check-text">Prototyp + Michał</span> <span class="check-plus">+100 zł</span></label>
+        </div>
+        <p class="field-default">Dopłata jednorazowa do wartości detalu. Zaznacz, jeśli dotyczy tego detalu.</p>
+      </div>
+
       <div class="form-actions">
         <button type="button" id="btn-reset" class="btn btn-ghost">Przywróć domyślne ustawienia</button>
       </div>
@@ -300,6 +295,10 @@
           <div class="final-row">
             <span class="final-label">Cena za 1 sztukę <small>(do klienta)</small></span>
             <span class="final-val" id="out-sztuka">—</span>
+          </div>
+          <div class="final-row" id="row-doplata" hidden>
+            <span class="final-label">Dopłata <small id="out-doplata-label">(prototyp)</small></span>
+            <span class="final-val plus" id="out-doplata">+ 0,00 zł</span>
           </div>
           <div class="final-row grand">
             <span class="final-label">Wartość tego detalu <small id="out-wartosc-label"></small></span>
@@ -359,6 +358,75 @@
     </div>
   </section>
 
+  <!-- ============ RAPORT BLACHY (DXF) ============ -->
+  <section class="raport" aria-label="Raport blachy">
+    <h2>Raport blachy <small>ile detalu wchodzi na arkusz</small></h2>
+    <p class="raport-intro">Wgraj plik DXF jednego detalu. Pokażę jego kształt, policzę ile sztuk mieści się na blasze i narysuję poglądowy układ. Rozpiskę wyślesz klientowi. Układ jest poglądowy (detale w rzędach), więc dla kształtów, które się zazębiają, liczba bywa lekko zaniżona.</p>
+
+    <div class="raport-grid">
+      <!-- LEWA: dane -->
+      <div class="raport-form">
+        <label class="drop" id="dxf-drop">
+          <input type="file" id="dxf-file" accept=".dxf" hidden>
+          <span class="drop-icon" aria-hidden="true">📄</span>
+          <span class="drop-text" id="drop-text">Wybierz plik DXF (albo przeciągnij tutaj)</span>
+        </label>
+        <p class="err" id="err-dxf" hidden></p>
+
+        <div class="raport-field">
+          <label class="field-label" for="nest-sheet">Rozmiar blachy</label>
+          <select id="nest-sheet" class="select">
+            <option value="1500x3000">1500 × 3000 mm</option>
+            <option value="1250x2500">1250 × 2500 mm</option>
+            <option value="1000x2000">1000 × 2000 mm</option>
+            <option value="custom">Inny rozmiar…</option>
+          </select>
+        </div>
+        <div class="raport-field raport-two" id="nest-custom" hidden>
+          <div class="input-wrap"><input type="number" id="nest-sheet-w" min="1" step="10" placeholder="szerokość"><span class="input-suffix">mm</span></div>
+          <div class="input-wrap"><input type="number" id="nest-sheet-h" min="1" step="10" placeholder="wysokość"><span class="input-suffix">mm</span></div>
+        </div>
+
+        <div class="raport-field raport-two">
+          <div>
+            <label class="field-label" for="nest-gap">Odstęp detali</label>
+            <div class="input-wrap"><input type="number" id="nest-gap" min="0" step="1" value="5"><span class="input-suffix">mm</span></div>
+          </div>
+          <div>
+            <label class="field-label" for="nest-margin">Margines blachy</label>
+            <div class="input-wrap"><input type="number" id="nest-margin" min="0" step="1" value="10"><span class="input-suffix">mm</span></div>
+          </div>
+        </div>
+
+        <div class="raport-field">
+          <label class="field-label" for="nest-qty">Ile sztuk potrzebuje klient</label>
+          <div class="input-wrap"><input type="number" id="nest-qty" min="1" step="1" value="100"><span class="input-suffix">szt</span></div>
+        </div>
+      </div>
+
+      <!-- PRAWA: wynik -->
+      <div class="raport-right">
+        <p class="raport-placeholder" id="raport-placeholder">Wgraj plik DXF, żeby zobaczyć podgląd detalu, układ na blasze i wyliczenie.</p>
+
+        <div class="raport-result" id="raport-result" hidden>
+          <div class="raport-previews">
+            <div class="preview-box">
+              <div class="preview-title">Detal <span id="part-dims"></span></div>
+              <div class="preview-svg" id="part-svg"></div>
+            </div>
+            <div class="preview-box">
+              <div class="preview-title">Układ na blasze <span id="sheet-dims"></span></div>
+              <div class="preview-svg" id="sheet-svg"></div>
+            </div>
+          </div>
+          <div class="raport-stats" id="raport-stats"></div>
+          <button type="button" id="btn-copy-raport" class="btn btn-primary">Kopiuj rozpiskę dla klienta</button>
+          <p class="copy-ok" id="raport-copy-ok" hidden>Skopiowano.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ STOPKA ============ -->
   <footer class="site-footer">
     <div class="footer-inner">
@@ -373,5 +441,6 @@
   </footer>
 
   <script src="script.js"></script>
+  <script src="nesting.js"></script>
 </body>
 </html>
